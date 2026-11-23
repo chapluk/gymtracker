@@ -9,6 +9,15 @@ export const freshState = () => ({ version: 1, sessions: [], active: null, weekl
 export const localDate = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 export const uid = () => globalThis.crypto.randomUUID();
 export const volume = session => session.exercises.reduce((total, exercise) => total + exercise.sets.reduce((sum, set) => sum + set.weight * set.reps, 0), 0);
+export function formatPace(distanceKm,duration) {
+  if(!Number.isFinite(distanceKm)||distanceKm<=0||!Number.isFinite(duration)||duration<=0)return '—';
+  const seconds=Math.max(1,Math.round(duration/distanceKm));
+  return `${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`;
+}
+export function validateRun(distanceKm,duration,active=false) {
+  if(!Number.isFinite(distanceKm)||distanceKm<(active?0:Number.MIN_VALUE)||distanceKm>1000)throw new Error('Isi jarak lari lebih dari 0, maksimal 1.000 km.');
+  if(!Number.isInteger(duration)||duration<(active?0:1)||duration>604800)throw new Error('Isi durasi lari minimal 1 detik, maksimal 7 hari.');
+}
 export function normalizeAthleteName(value) {
   if(typeof value !== 'string' || /[\u0000-\u001f\u007f]/.test(value)) throw new Error('Isi nama yang valid sebelum menyimpan latihan.');
   const name=value.normalize('NFC').trim().replace(/\s+/g,' ');
@@ -20,6 +29,14 @@ export const athleteLabel = session => session.athleteName || 'Tanpa nama';
 export const filterAthlete = (sessions,name) => name?sessions.filter(s=>athleteKey(athleteLabel(s))===athleteKey(name)):sessions;
 export function completeSession(active,athleteName,now=Date.now()) {
   if(!active) throw new Error('Tidak ada sesi aktif.');
+  if(active.type==='running'){
+    validateRun(active.distanceKm,active.runningDuration);
+    // Keep one empty exercise entry for compatibility with the existing JSONB table constraint.
+    // Running has no lifting sets and contributes zero weight volume.
+    const {runningDuration,...draft}=active;
+    const session={...draft,athleteName:normalizeAthleteName(athleteName),duration:runningDuration,exercises:[{name:'Running',sets:[]}]};
+    validateState({...freshState(),sessions:[session]});return session;
+  }
   const exercises=active.exercises.map(e=>({...e,sets:e.sets.filter(s=>s.done)})).filter(e=>e.sets.length);
   if(!exercises.length)throw new Error('Centang minimal satu set yang sudah selesai.');
   const session={...active,athleteName:normalizeAthleteName(athleteName),exercises,duration:Math.max(0,Math.round((now-Date.parse(active.startedAt))/1000))};
@@ -36,10 +53,15 @@ export function validateState(data) {
   const ids = new Set();
   const checkSession = (s, active = false) => {
     if(s?.athleteName !== undefined) normalizeAthleteName(s.athleteName);
+    if(s?.type!==undefined&&!['gym','running'].includes(s.type))throw new Error('Jenis latihan tidak valid.');
+    if(s?.type==='running'){
+      validateRun(s.distanceKm,active?s.runningDuration:s.duration,active);
+      if(!Array.isArray(s.exercises)||s.exercises.length!==1||s.exercises[0]?.name!=='Running'||!Array.isArray(s.exercises[0]?.sets)||s.exercises[0].sets.length)throw new Error('Data sesi running tidak valid.');
+    }
     if (!s || typeof s.id !== 'string' || ids.has(s.id) || typeof s.name !== 'string' || !s.name.trim() || s.name.length > 100 || !/^\d{4}-\d{2}-\d{2}$/.test(s.date) || !Number.isFinite(Date.parse(s.date)) || new Date(s.date).toISOString().slice(0,10) !== s.date || !Number.isFinite(Date.parse(s.startedAt)) || (!active && (!Number.isFinite(s.duration) || s.duration < 0)) || !Array.isArray(s.exercises) || s.exercises.length > 100 || (!active && !s.exercises.length)) throw new Error('Data sesi latihan tidak valid.');
     ids.add(s.id);
     for (const e of s.exercises) {
-      if (typeof e.name !== 'string' || !e.name.trim() || e.name.length > 100 || !Array.isArray(e.sets) || e.sets.length > 100 || (!active && !e.sets.length)) throw new Error('Data gerakan tidak valid.');
+      if (typeof e.name !== 'string' || !e.name.trim() || e.name.length > 100 || !Array.isArray(e.sets) || e.sets.length > 100 || (!active && s.type!=='running' && !e.sets.length)) throw new Error('Data gerakan tidak valid.');
       for (const set of e.sets) if (!Number.isFinite(set.weight) || set.weight < 0 || set.weight > 2000 || !Number.isInteger(set.reps) || set.reps < (active ? 0 : 1) || set.reps > 10000 || typeof set.done !== 'boolean') throw new Error('Beban atau repetisi tidak valid.');
     }
   };
