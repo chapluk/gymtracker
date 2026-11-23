@@ -15,8 +15,8 @@ export async function connectSupabase(config) {
   validatePublicConfig(config);
   await new Promise((resolve,reject)=>{
     const script=document.createElement('script');
-    script.src=new URL('./vendor/supabase.js',import.meta.url).href;
-    script.onload=resolve;script.onerror=()=>reject(new Error('SDK Supabase gagal dimuat. Pastikan folder vendor ikut di-upload.'));
+    script.src=new URL('./supabase-sdk.js',import.meta.url).href;
+    script.onload=resolve;script.onerror=()=>reject(new Error('SDK Supabase gagal dimuat. Pastikan supabase-sdk.js ikut di-upload.'));
     document.head.append(script);
   });
   return globalThis.supabase.createClient(config.url,config.publishableKey,{
