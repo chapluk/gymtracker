@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#d9f76b">
-  <meta name="description" content="Gym tracker pribadi. Catat latihan, bangun konsistensi, dan pantau progres tanpa database eksternal.">
+  <meta name="description" content="Gym tracker bersama. Catat latihan dengan nama masing-masing dan pantau progres bareng.">
   <title>Repbook — Your progress, on record.</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
@@ -22,7 +22,7 @@
     <div class="sidebar-bottom"><div class="local-card"><span data-icon="shield"></span><strong>Pribadi. Tetap punya lo.</strong><p>Data tersimpan di browser ini.<br>Tanpa akun, tanpa ribet.</p><button class="text-button" data-action="backup">Kelola backup <span data-icon="download"></span></button></div><div class="profile"><div class="avatar">Y</div><div><strong>Your space</strong><span>One rep at a time.</span></div><span class="online-dot" title="Penyimpanan lokal"></span></div></div>
   </aside>
   <div class="main-shell">
-    <header class="topbar"><div><span class="breadcrumb">Workspace</span><span class="slash">/</span><strong id="page-label">Overview</strong></div><div class="topbar-right"><span class="local-pill"><i></i> Local storage</span><span id="today"></span><button class="icon-button" data-action="backup" aria-label="Kelola backup JSON"><span data-icon="download"></span></button></div></header>
+    <header class="topbar"><div><span class="breadcrumb">Workspace</span><span class="slash">/</span><strong id="page-label">Overview</strong></div><div class="topbar-right"><span class="local-pill" id="cloud-status" role="status">Mode lokal</span><span id="today"></span><button class="account-button" id="account-button" data-action="account">Akun</button><button class="icon-button" data-action="backup" aria-label="Kelola backup JSON"><span data-icon="download"></span></button></div></header>
     <main id="app" tabindex="-1"></main>
     <footer>BUILT FOR THE LONG RUN.<span>Small steps. Stronger you.</span></footer>
   </div>
