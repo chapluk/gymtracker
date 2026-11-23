@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { freshState, validateState, volume, weekDates, localDate } from './core.js';
+const session = () => ({id:'test-1',name:'Push day',date:'2026-11-23',startedAt:'2026-11-23T02:00:00.000Z',duration:3600,exercises:[{name:'Bench Press',sets:[{weight:40,reps:10,done:true},{weight:45,reps:8,done:true}]}]});
+test('JSON backup round trip retains sessions and ongoing work',()=>{const data={...freshState(),sessions:[session()],active:{...session(),id:'active-1',exercises:[{name:'Squat',sets:[{weight:0,reps:0,done:false}]}]}};assert.deepEqual(validateState(JSON.parse(JSON.stringify(data))),data);assert.equal(volume(data.sessions[0]),760);});
+test('reject malformed imports without accepting corrupt numeric data',()=>{for(const invalid of [null,{}, {...freshState(),weeklyGoal:8},{...freshState(),sessions:[{...session(),date:'2026-02-31'}]},{...freshState(),sessions:[session(),session()]},{...freshState(),sessions:[{...session(),exercises:[{name:'Bad',sets:[{weight:-1,reps:10,done:true}]}]}]}])assert.throws(()=>validateState(invalid));});
+test('week starts on Monday and stays correct over month/year boundaries',()=>{assert.deepEqual(weekDates(new Date(2027,0,3)),['2026-12-28','2026-12-29','2026-12-30','2026-12-31','2027-01-01','2027-01-02','2027-01-03']);assert.equal(localDate(new Date(2026,10,23,0,1)),'2026-11-23');});

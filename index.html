@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#d9f76b">
+  <meta name="description" content="Gym tracker pribadi. Catat latihan, bangun konsistensi, dan pantau progres tanpa database eksternal.">
+  <title>Repbook — Your progress, on record.</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="#dashboard"><span class="brand-mark">r.</span>repbook<span class="brand-period">®</span></a>
+    <div class="workspace-label">YOUR TRAINING SPACE</div>
+    <nav aria-label="Navigasi utama">
+      <a href="#dashboard" data-nav="dashboard"><span data-icon="grid"></span>Overview</a>
+      <a href="#workout" data-nav="workout"><span data-icon="dumbbell"></span>Latihan</a>
+      <a href="#history" data-nav="history"><span data-icon="clock"></span>Riwayat latihan</a>
+      <a href="#progress" data-nav="progress"><span data-icon="chart"></span>Progres</a>
+    </nav>
+    <div class="sidebar-bottom"><div class="local-card"><span data-icon="shield"></span><strong>Pribadi. Tetap punya lo.</strong><p>Data tersimpan di browser ini.<br>Tanpa akun, tanpa ribet.</p><button class="text-button" data-action="backup">Kelola backup <span data-icon="download"></span></button></div><div class="profile"><div class="avatar">Y</div><div><strong>Your space</strong><span>One rep at a time.</span></div><span class="online-dot" title="Penyimpanan lokal"></span></div></div>
+  </aside>
+  <div class="main-shell">
+    <header class="topbar"><div><span class="breadcrumb">Workspace</span><span class="slash">/</span><strong id="page-label">Overview</strong></div><div class="topbar-right"><span class="local-pill"><i></i> Local storage</span><span id="today"></span><button class="icon-button" data-action="backup" aria-label="Kelola backup JSON"><span data-icon="download"></span></button></div></header>
+    <main id="app" tabindex="-1"></main>
+    <footer>BUILT FOR THE LONG RUN.<span>Small steps. Stronger you.</span></footer>
+  </div>
+  <dialog id="modal"><div id="modal-content"></div></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <input type="file" id="import-file" accept="application/json,.json" hidden>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
